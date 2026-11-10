@@ -22,6 +22,43 @@ $stats['total_barang'] = $r->fetch_assoc()['total'];
 $r = query("SELECT COUNT(*) as total FROM barang WHERE stok < 10");
 $stats['stok_rendah'] = $r->fetch_assoc()['total'];
 
+// Ringkasan penjualan dan pembelian per bulan selama 12 bulan terakhir
+$bulanMulai = new DateTimeImmutable('first day of this month');
+$bulanMulai = $bulanMulai->modify('-11 months');
+$bulanSelesai = (new DateTimeImmutable('first day of next month'));
+$grafikTransaksi = [];
+$labelBulan = [];
+$namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+for ($i = 0; $i < 12; $i++) {
+    $bulan = $bulanMulai->modify("+$i months");
+    $periode = $bulan->format('Y-m');
+    $labelBulan[] = $namaBulan[(int) $bulan->format('n') - 1] . ' ' . $bulan->format('Y');
+    $grafikTransaksi[$periode] = ['penjualan' => 0, 'pembelian' => 0];
+}
+
+$tanggalMulai = $bulanMulai->format('Y-m-d');
+$tanggalSelesai = $bulanSelesai->format('Y-m-d');
+$ringkasanTransaksi = query("SELECT periode, SUM(penjualan) AS penjualan, SUM(pembelian) AS pembelian FROM (
+    SELECT DATE_FORMAT(tanggal, '%Y-%m') AS periode, SUM(total) AS penjualan, 0 AS pembelian
+    FROM penjualan WHERE tanggal >= '$tanggalMulai' AND tanggal < '$tanggalSelesai' GROUP BY periode
+    UNION ALL
+    SELECT DATE_FORMAT(tanggal, '%Y-%m') AS periode, 0 AS penjualan, SUM(total) AS pembelian
+    FROM pembelian WHERE tanggal >= '$tanggalMulai' AND tanggal < '$tanggalSelesai' GROUP BY periode
+) AS transaksi GROUP BY periode ORDER BY periode");
+
+while ($row = $ringkasanTransaksi->fetch_assoc()) {
+    if (isset($grafikTransaksi[$row['periode']])) {
+        $grafikTransaksi[$row['periode']] = [
+            'penjualan' => (float) $row['penjualan'],
+            'pembelian' => (float) $row['pembelian']
+        ];
+    }
+}
+
+$dataPenjualan = array_column($grafikTransaksi, 'penjualan');
+$dataPembelian = array_column($grafikTransaksi, 'pembelian');
+
 // Transaksi Terbaru
 $transaksi = query("SELECT p.*, u.nama as nama_user FROM penjualan p 
     LEFT JOIN users u ON p.id_user = u.id 
@@ -71,6 +108,15 @@ $transaksi = query("SELECT p.*, u.nama as nama_user FROM penjualan p
                 <h3><?= $stats['stok_rendah'] ?></h3>
                 <p>Stok Rendah</p>
             </div>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <div class="card-header">
+            <h4><i class="fas fa-chart-bar"></i> Grafik Transaksi 12 Bulan Terakhir</h4>
+        </div>
+        <div class="chart-container">
+            <canvas id="grafikTransaksi" aria-label="Grafik nilai penjualan dan pembelian per bulan" role="img"></canvas>
         </div>
     </div>
 
@@ -155,5 +201,50 @@ $transaksi = query("SELECT p.*, u.nama as nama_user FROM penjualan p
         </table>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const canvasTransaksi = document.getElementById('grafikTransaksi');
+new Chart(canvasTransaksi, {
+    type: 'bar',
+    data: {
+        labels: <?= json_encode($labelBulan, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>,
+        datasets: [
+            {
+                label: 'Penjualan',
+                data: <?= json_encode($dataPenjualan) ?>,
+                backgroundColor: 'rgba(67, 97, 238, 0.78)',
+                borderRadius: 4
+            },
+            {
+                label: 'Pembelian',
+                data: <?= json_encode($dataPembelian) ?>,
+                backgroundColor: 'rgba(46, 196, 182, 0.78)',
+                borderRadius: 4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: context => `${context.dataset.label}: Rp ${new Intl.NumberFormat('id-ID').format(context.parsed.y)}`
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: value => `Rp ${new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(value)}`
+                }
+            }
+        }
+    }
+});
+</script>
 
 <?php require_once '../includes/footer.php'; ?>
