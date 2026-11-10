@@ -71,8 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </form>
 
         <div class="login-footer">
-            <p>Default: admin / kasir</p>
-            <p>Password: password</p>
         </div>
     </div>
 </body>
