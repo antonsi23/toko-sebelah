@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Toko Online</title>
+    <title>Login - Toko Sebelah</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="login-logo">
             <i class="fas fa-store"></i>
         </div>
-        <h2>Toko Online</h2>
+        <h2>Toko Sebelah</h2>
         <p class="subtitle">Silakan login untuk melanjutkan</p>
 
         <?php if ($error): ?>
