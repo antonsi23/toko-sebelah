@@ -764,6 +764,42 @@
     background: #fff;
 }
 
+.filter-form {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.filter-form .form-group {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.filter-form .form-control {
+    min-height: 44px;
+    padding: 10px 12px;
+}
+
+.filter-form [hidden] {
+    display: none;
+}
+
+.filter-form button {
+    min-height: 44px;
+}
+
+@media (max-width: 600px) {
+    .filter-form .form-group {
+        flex-basis: 100%;
+    }
+
+    .filter-form button {
+        width: 100%;
+    }
+}
+
 .inventory-line {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 90px 40px;
