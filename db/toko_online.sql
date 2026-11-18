@@ -53,6 +53,11 @@ CREATE TABLE pembelian (
     id_user INT,
     tanggal DATETIME DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(15,2) NOT NULL DEFAULT 0,
+    total_tagihan DECIMAL(15,2) NOT NULL DEFAULT 0,
+    jenis_pembayaran ENUM('tunai','cicilan') NOT NULL DEFAULT 'tunai',
+    tenor_bulan TINYINT UNSIGNED DEFAULT NULL,
+    bunga_persen DECIMAL(5,2) NOT NULL DEFAULT 0,
+    dibayar DECIMAL(15,2) NOT NULL DEFAULT 0,
     status ENUM('lunas','hutang') DEFAULT 'lunas',
     FOREIGN KEY (id_supplier) REFERENCES supplier(id) ON DELETE SET NULL,
     FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE SET NULL
@@ -77,11 +82,46 @@ CREATE TABLE penjualan (
     id_user INT,
     tanggal DATETIME DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(15,2) NOT NULL DEFAULT 0,
+    total_tagihan DECIMAL(15,2) NOT NULL DEFAULT 0,
+    jenis_pembayaran ENUM('tunai','cicilan') NOT NULL DEFAULT 'tunai',
+    tenor_bulan TINYINT UNSIGNED DEFAULT NULL,
+    bunga_persen DECIMAL(5,2) NOT NULL DEFAULT 0,
     bayar DECIMAL(15,2) NOT NULL DEFAULT 0,
+    dibayar DECIMAL(15,2) NOT NULL DEFAULT 0,
     kembalian DECIMAL(15,2) NOT NULL DEFAULT 0,
     nama_pembeli VARCHAR(200) DEFAULT 'Umum',
     telepon_pembeli VARCHAR(30) DEFAULT NULL,
     email_pembeli VARCHAR(150) DEFAULT NULL,
+    FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Pengaturan bunga untuk setiap pilihan tenor cicilan
+CREATE TABLE pengaturan_cicilan (
+    id TINYINT UNSIGNED PRIMARY KEY,
+    bunga_3_bulan DECIMAL(5,2) NOT NULL DEFAULT 0,
+    bunga_6_bulan DECIMAL(5,2) NOT NULL DEFAULT 0,
+    bunga_12_bulan DECIMAL(5,2) NOT NULL DEFAULT 0
+);
+
+INSERT INTO pengaturan_cicilan (id) VALUES (1);
+
+CREATE TABLE pembayaran_pembelian (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_pembelian INT NOT NULL,
+    id_user INT,
+    tanggal DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    jumlah DECIMAL(15,2) NOT NULL,
+    FOREIGN KEY (id_pembelian) REFERENCES pembelian(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE pembayaran_penjualan (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_penjualan INT NOT NULL,
+    id_user INT,
+    tanggal DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    jumlah DECIMAL(15,2) NOT NULL,
+    FOREIGN KEY (id_penjualan) REFERENCES penjualan(id) ON DELETE CASCADE,
     FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE SET NULL
 );
 

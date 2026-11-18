@@ -33,6 +33,9 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
         <li class="<?= $current_page == 'users' ? 'active' : '' ?>">
             <a href="users.php"><i class="fas fa-users"></i> Pengguna</a>
         </li>
+        <li class="<?= $current_page == 'pengaturan_cicilan' ? 'active' : '' ?>">
+            <a href="pengaturan_cicilan.php"><i class="fas fa-percent"></i> Bunga Cicilan</a>
+        </li>
         <li class="<?= $current_page == 'laporan' ? 'active' : '' ?>">
             <a href="laporan.php"><i class="fas fa-chart-bar"></i> Laporan</a>
         </li>
