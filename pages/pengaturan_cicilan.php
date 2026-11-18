@@ -19,14 +19,17 @@ if (isset($_POST['simpan'])) {
         $rates[$term] = $rate;
     }
 
+    $bunga_3 = $rates[3];
+    $bunga_6 = $rates[6];
+    $bunga_12 = $rates[12];
     $stmt = $conn->prepare('UPDATE pengaturan_cicilan SET bunga_3_bulan = ?, bunga_6_bulan = ?, bunga_12_bulan = ? WHERE id = 1');
-    $stmt->bind_param('ddd', $rates[3], $rates[6], $rates[12]);
+    $stmt->bind_param('ddd', $bunga_3, $bunga_6, $bunga_12);
     $stmt->execute();
     if ($stmt->affected_rows === 0) {
         $check = query('SELECT id FROM pengaturan_cicilan WHERE id = 1');
         if ($check->num_rows === 0) {
             $insert = $conn->prepare('INSERT INTO pengaturan_cicilan (id, bunga_3_bulan, bunga_6_bulan, bunga_12_bulan) VALUES (1, ?, ?, ?)');
-            $insert->bind_param('ddd', $rates[3], $rates[6], $rates[12]);
+            $insert->bind_param('ddd', $bunga_3, $bunga_6, $bunga_12);
             $insert->execute();
         }
     }

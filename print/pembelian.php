@@ -23,6 +23,10 @@ $detail_stmt = $conn->prepare('SELECT d.jumlah, d.harga_beli, d.subtotal, b.nama
 $detail_stmt->bind_param('i', $id);
 $detail_stmt->execute();
 $details = $detail_stmt->get_result();
+$payment_stmt = $conn->prepare('SELECT p.tanggal, p.jumlah, u.nama AS nama_user FROM pembayaran_pembelian p LEFT JOIN users u ON p.id_user = u.id WHERE p.id_pembelian = ? ORDER BY p.tanggal, p.id');
+$payment_stmt->bind_param('i', $id);
+$payment_stmt->execute();
+$payments = $payment_stmt->get_result();
 $escapeHtml = static fn($value) => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
@@ -87,11 +91,26 @@ $escapeHtml = static fn($value) => htmlspecialchars((string) $value, ENT_QUOTES,
         </table>
 
         <table class="summary">
-            <tr class="grand-total">
-                <td>Total Pembelian</td>
-                <td class="numeric">Rp <?= number_format($invoice['total'], 0, ',', '.') ?></td>
-            </tr>
+            <tr><td>Total barang</td><td class="numeric">Rp <?= number_format($invoice['total'], 0, ',', '.') ?></td></tr>
+            <?php if ($invoice['jenis_pembayaran'] === 'cicilan'): ?>
+            <tr><td>Bunga cicilan (<?= intval($invoice['tenor_bulan']) ?> bulan, <?= number_format($invoice['bunga_persen'], 2, ',', '.') ?>%)</td><td class="numeric">Rp <?= number_format($invoice['total_tagihan'] - $invoice['total'], 0, ',', '.') ?></td></tr>
+            <?php endif; ?>
+            <tr class="grand-total"><td>Total tagihan</td><td class="numeric">Rp <?= number_format($invoice['total_tagihan'], 0, ',', '.') ?></td></tr>
+            <?php if ($invoice['jenis_pembayaran'] === 'cicilan'): ?>
+            <tr><td>Cicilan per bulan</td><td class="numeric">Rp <?= number_format($invoice['total_tagihan'] / $invoice['tenor_bulan'], 0, ',', '.') ?></td></tr>
+            <?php endif; ?>
+            <tr><td>Sudah dibayar</td><td class="numeric">Rp <?= number_format($invoice['dibayar'], 0, ',', '.') ?></td></tr>
+            <tr><td>Sisa tagihan</td><td class="numeric">Rp <?= number_format(max(0, $invoice['total_tagihan'] - $invoice['dibayar']), 0, ',', '.') ?></td></tr>
         </table>
+
+        <?php if ($invoice['jenis_pembayaran'] === 'cicilan'): ?>
+        <h2>Riwayat Pembayaran</h2>
+        <table class="items-table"><thead><tr><th>Tanggal</th><th>Dicatat oleh</th><th class="numeric">Jumlah</th></tr></thead><tbody>
+            <?php while ($payment = $payments->fetch_assoc()): ?>
+            <tr><td><?= date('d/m/Y H:i', strtotime($payment['tanggal'])) ?></td><td><?= $escapeHtml($payment['nama_user'] ?? '-') ?></td><td class="numeric">Rp <?= number_format($payment['jumlah'], 0, ',', '.') ?></td></tr>
+            <?php endwhile; ?>
+        </tbody></table>
+        <?php endif; ?>
 
         <footer class="footer">Terima kasih. Invoice ini dibuat secara otomatis oleh sistem.</footer>
     </main>
