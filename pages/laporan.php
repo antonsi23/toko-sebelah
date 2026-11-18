@@ -58,6 +58,14 @@ $queryPeriode = http_build_query([
         </form>
     </div>
 
+    <div class="content-card">
+        <div class="card-header"><h4><i class="fas fa-print"></i> Cetak Laporan Per Jenis</h4></div>
+        <p>Pilih laporan barang yang ingin dicetak. Laporan penjualan dan pembelian mengikuti periode di atas; laporan stok menampilkan kondisi stok saat ini.</p>
+        <a href="../print/laporan.php?jenis=penjualan&amp;<?= htmlspecialchars($queryPeriode, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-success"><i class="fas fa-cash-register"></i> Penjualan Barang</a>
+        <a href="../print/laporan.php?jenis=pembelian&amp;<?= htmlspecialchars($queryPeriode, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-warning"><i class="fas fa-shopping-cart"></i> Pembelian Barang</a>
+        <a href="../print/laporan.php?jenis=stok" class="btn btn-primary"><i class="fas fa-boxes-stacked"></i> Stok Barang</a>
+    </div>
+
     <div class="stats-grid">
         <div class="stat-card success">
             <div class="stat-icon"><i class="fas fa-cash-register"></i></div>

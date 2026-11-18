@@ -20,6 +20,9 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
         <li class="<?= $current_page == 'pembelian' ? 'active' : '' ?>">
             <a href="pembelian.php"><i class="fas fa-shopping-cart"></i> Pembelian</a>
         </li>
+        <li class="<?= $current_page == 'pembayaran_cicilan' ? 'active' : '' ?>">
+            <a href="pembayaran_cicilan.php"><i class="fas fa-money-bill-wave"></i> Pembayaran Cicilan</a>
+        </li>
         <li class="<?= $current_page == 'barang' ? 'active' : '' ?>">
             <a href="barang.php"><i class="fas fa-box"></i> Data Barang</a>
         </li>
